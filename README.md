@@ -13,7 +13,7 @@ git clone https://github.com/UF-HH/bbbbAnalysis
 # from bbbbAnalysis/
 cmsenv
 source scripts/setup.sh # only needed once for every new shell
-make exe -j # compiles and makes everything under test/ executable
+make exe -j # compiles and makes everything under test/ executable # Make sure you are on the branch mlBranch (git checkout mlBranch)
 ````
 
 ## Make a skim of NanoAOD
