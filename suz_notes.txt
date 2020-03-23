@@ -1,1 +1,5 @@
+To copy a file from EOS, use command xrdcp <url-of-file> <destination>
+    for example:
+        xrdcp root://cmseos.fnal.gov//store/user/srosenz/path/to/file.filetype
+
 
