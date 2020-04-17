@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 # from matplotlib import cm
 # from matplotlib.colors import ListedColormap
 from GenHisto import Histogram
+# import matplotlib.backends.backend_pdf
+# pdf = matplotlib.backends.backend_pdf.PdfPages("eff_and_pur_v6.pdf")
 
 # # This block of code causes bins with zero value to appear as white.
 # col_map = cm.get_cmap('rainbow', 256)
@@ -13,7 +15,7 @@ from GenHisto import Histogram
 # newcolors[0, :] = white    # Only change bins with 0 entries.
 # newcmp = ListedColormap(newcolors)
 
-filename = '2016DataPlots_NMSSM_XYH_bbbb_Fast_fastSimv1_jetflag/outPlotter.root '
+filename = '2016DataPlots_NMSSM_XYH_bbbb_Fast_fastSim_v6_swapHY/outPlotter.root '
 
 print("[INFO] Opening file {}".format(filename))
 f = TFile(filename)
@@ -61,18 +63,29 @@ for MX in mX:
 # print("[INFO] Saving Pandas DataFrame to {}".format("outPlotter_efficiencies.csv"))
 # df.to_csv("outPlotter_efficiencies.csv",index=False) # Save DataFrame values as csv.
 
-df_eff_tot = df.pivot(index='mY',columns='mX',values='eff_tot')
+tag = '_fastSim_v6'
+
 df_eff_sel = df.pivot(index='mY',columns='mX',values='eff_sel')
 df_pur_sel = df.pivot(index='mY',columns='mX',values='pur_sel')
 df_alt_pur_sel = df.pivot(index='mY',columns='mX',values='alt_pur_sel')
 
-print("[INFO] Plotting efficiencies...")
-hist_eff_tot = Histogram(filesave='eff_tot.png', xdata=df_eff_tot, isDataFrame=True, label=True, comap='rainbow', vmin=0.0, vmax=1.0, fmt='.3f', whiteBkgd=True, labelsize=10)
+print(df_eff_sel)
+print(df_pur_sel)
+print(df_alt_pur_sel)
 
-hist_eff_sel = Histogram(filesave='eff_sel.pdf', xdata=df_eff_sel, isDataFrame=True, label=True, comap='rainbow', vmin=0.0, vmax=1.0, fmt='.3f')
+print("[INFO] Plotting efficiencies...")
+
+hist_eff_sel = Histogram(filesave='eff_sel{}.pdf'.format(tag), xdata=df_eff_sel, isDataFrame=True, label=True, comap='rainbow', vmin=0.0, vmax=1.0, fmt='.3f', labelsize=10, title='Efficiency, mH=125 GeV')
+hist_eff_sel.saveHist('eff_HYswap.png')
 
 print("[INFO] Plotting purities...")
-hist_eff_sel = Histogram(filesave='pur_sel.pdf', xdata=df_pur_sel, isDataFrame=True, label=True, comap='rainbow', vmin=0.0, vmax=1.0, fmt='.3f')
+hist_pur_sel = Histogram(filesave='pur_sel.pdf', xdata=df_pur_sel, isDataFrame=True, label=True, comap='rainbow', vmin=0.0, vmax=1.0, fmt='.3f', labelsize=10, title='Purity (gen matching per candidate)')
+hist_pur_sel.saveHist('pur_HYswap.png')
 
-hist_eff_sel_alt = Histogram(filesave='alt_pur_sel.pdf', xdata=df_alt_pur_sel, isDataFrame=True, label=True, comap='rainbow', vmin=0.0, vmax=1.0, fmt='.3f')
+hist_eff_sel_alt = Histogram(filesave='alt_pur_sel.pdf', xdata=df_alt_pur_sel, isDataFrame=True, label=True, comap='rainbow', vmin=0.0, vmax=1.0, fmt='.3f', labelsize=10, title='Purity (gen matching per jet)')
+hist_eff_sel_alt.saveHist('pur2_HYswap.png')
 
+
+
+
+# pdf.close()

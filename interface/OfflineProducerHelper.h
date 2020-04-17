@@ -35,6 +35,7 @@
 #include <initializer_list>
 #include <boost/optional.hpp>
 #include <any>
+#include <string>
 
 // namespace OfflineProducerHelper {
 class OfflineProducerHelper{
@@ -407,7 +408,7 @@ class OfflineProducerHelper{
         bool select_gen_HH           (NanoAODTree& nat, EventInfo& ei);
         bool select_gen_YH           (NanoAODTree& nat, EventInfo& ei);
         bool select_gen_bb_bb        (NanoAODTree& nat, EventInfo& ei);
-        bool select_gen_bb_bb_forXYH (NanoAODTree& nat, EventInfo& ei, const float deltaR_threshold);
+        bool select_gen_bb_bb_forXYH (NanoAODTree& nat, EventInfo& ei, const float maxDeltaR, const int mY);
         bool checkReco_gen_bbbb      (NanoAODTree& nat, EventInfo& ei);
         bool select_gen_VBF_partons  (NanoAODTree& nat, EventInfo& ei);
 
@@ -415,8 +416,8 @@ class OfflineProducerHelper{
         void dump_gen_part (NanoAODTree& nat, bool printFlags = true);
         // bool checkBit(int number, int bitpos);
         int  recursive_gen_mother_idx(const GenPart& gp, bool stop_at_moth_zero = true); // returns the uppermost ancestor in the gen particle chain
-                                                                                        // if stop_at_moth_zero = true, it returns when a GenPart is found and his mother has idx 0
-                                                                                        // instead of returning the GenPart # 0 itself
+        // if stop_at_moth_zero = true, it returns when a GenPart is found and his mother has idx 0
+        // instead of returning the GenPart # 0 itself
         
         // loops on targets, and assigns value to the first element of target that is found to be uninitialized
         // returns false if none could be assigned, else return true

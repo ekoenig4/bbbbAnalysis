@@ -1,6 +1,9 @@
 from ROOT import TFile, TCanvas, TH1F, gROOT, kTRUE
 gROOT.SetBatch(kTRUE) # Do not display canvas
 
+# This program looks at the jet multiplicity, pT distribution of the b jets, and DeltaEta and DeltaPhi of the bs from the same parent in a sample.
+
+
 def drawPortrait(filename, eosbool):
     """
     The idea for this program is to take in a ROOT file and draw all of the interesting branches.
@@ -68,4 +71,4 @@ def drawPortrait(filename, eosbool):
     c1.Print(filename)
     c1.Print(filename+"]")
 
-drawPortrait('test_NMSSM_XYH_bbbb_MC_selectedJets_20GeVpT.root',False)
+drawPortrait('test_NMSSM_XYH_bbbb_MC_selectedJets_nocuts.root',False)

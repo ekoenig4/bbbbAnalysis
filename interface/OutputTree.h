@@ -20,6 +20,7 @@
 #include "UserValCollection.h"
 #include <string>
 #include <memory>
+#include <vector>
 
 // helper: declares the m/pt/eta/phi/p4 of a variable OBJ
 #define DECLARE_m_pt_eta_phi_p4(OBJ) \
@@ -121,7 +122,11 @@ class OutputTree {
         float recoJetMatchedToGenJet3;
         float recoJetMatchedToGenJet4;
 
+        int nGenJet;
         std::vector<double> gen_jet_pt;
+        std::vector<double> gen_jet_eta;
+        std::vector<double> gen_jet_phi;
+        std::vector<double> gen_jet_m;
         float jet_pt;
 
 

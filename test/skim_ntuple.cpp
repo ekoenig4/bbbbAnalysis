@@ -541,7 +541,8 @@ int main(int argc, char** argv)
         if (is_signal)
         {
             oph.select_gen_YH(nat, ei);
-            if (!oph.select_gen_bb_bb_forXYH(nat, ei, maxDeltaR))
+            const int MY = std::stoi(yMassSelection);
+            if (!oph.select_gen_bb_bb_forXYH(nat, ei, maxDeltaR, MY))
             {
                 std::cout << __PRETTY_FUNCTION__ << __LINE__ << "no gen matching found!!!" << std::endl;
                 continue; 

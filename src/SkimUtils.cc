@@ -399,7 +399,13 @@ void SkimUtils::fill_output_tree(OutputTree& ot, NanoAODTree& nat, EventInfo& ei
     if(ei.recoJetMatchedToGenJet2) ot.recoJetMatchedToGenJet2 = *ei.recoJetMatchedToGenJet2;
     if(ei.recoJetMatchedToGenJet3) ot.recoJetMatchedToGenJet3 = *ei.recoJetMatchedToGenJet3;
     if(ei.recoJetMatchedToGenJet4) ot.recoJetMatchedToGenJet4 = *ei.recoJetMatchedToGenJet4;
-  
+
+    if(ei.nGenJet) ot.nGenJet = *ei.nGenJet;
+    ot.gen_jet_pt = ei.gen_jet_pt;
+    ot.gen_jet_eta = ei.gen_jet_eta;
+    ot.gen_jet_phi = ei.gen_jet_phi;
+    ot.gen_jet_m = ei.gen_jet_m;
+
 
 
 

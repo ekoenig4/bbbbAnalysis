@@ -11,6 +11,7 @@
 **/
 
 #include <boost/optional.hpp>
+#include <vector>
 
 #include "CompositeCandidate.h"
 #include "Jet.h"
@@ -43,7 +44,11 @@ struct EventInfo{
     boost::optional<int>     recoJetMatchedToGenJet3;
     boost::optional<int>     recoJetMatchedToGenJet4;
 
-    boost::optional<double>   gen_jet_pt;
+    boost::optional<int>     nGenJet;
+    std::vector<std::double_t>   gen_jet_pt;
+    std::vector<std::double_t>   gen_jet_eta;
+    std::vector<std::double_t>   gen_jet_phi;
+    std::vector<std::double_t>   gen_jet_m;
     boost::optional<float>   jet_pt;
 
     // VBF incoming and outcoming partons

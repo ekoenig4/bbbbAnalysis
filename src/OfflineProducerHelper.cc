@@ -4,6 +4,8 @@
 #include <cmath>
 #include <stdlib.h>
 #include <numeric>
+#include <typeinfo>
+#include <string>
 
 #include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
 #include "CompositeCandidate.h"
@@ -22,8 +24,6 @@
 #include "TMVA/Reader.h"
 
 using namespace std;
-
-gROOT->ProcessLine("#include <vector>");
 
 const std::string OfflineProducerHelper::nominal_jes_syst_shift_name = "nominal";
 
@@ -1192,10 +1192,24 @@ bool OfflineProducerHelper::select_bbbb_jets(NanoAODTree& nat, EventInfo& ei, Ou
     // Loop through gen jets and collect their pT to study distribution.
     std::vector<GenJet> genJets;
     std::vector<Double_t> genJets_pt;
+    std::vector<Double_t> genJets_eta;
+    std::vector<Double_t> genJets_phi;
+    std::vector<Double_t> genJets_m;
+    // genJets_pt.reserve(*(nat.nGenJet));
 
-    for (uint i = 0; i < *(nat.nGenJet); i++){genJets.emplace_back(GenJet(i, &nat)); genJets_pt.emplace(genJets[i].P4().Pt());}
+    // std::cout << "Num jets:" << *(nat.nGenJet) << std::endl;
+    for (uint i = 0; i < *(nat.nGenJet); i++){genJets.emplace_back(GenJet(i, &nat)); genJets_pt.emplace_back(genJets[i].P4().Pt()); genJets_eta.emplace_back(genJets[i].P4().Eta()); genJets_phi.emplace_back(genJets[i].P4().Phi()); genJets_m.emplace_back(genJets[i].P4().M());}
+
+    // std::cout << "Jet vector: " << genJets_pt << std::cout;
 
     ei.gen_jet_pt = genJets_pt;
+    ei.gen_jet_eta = genJets_eta;
+    ei.gen_jet_phi = genJets_phi;
+    ei.gen_jet_m = genJets_m;
+    // std::cout << *(nat.nGenJet) << std::endl;
+    ei.nGenJet = *(nat.nGenJet);
+    ei.nJet = *(nat.nJet);
+
 
 
     //If MC sample, then obtain the jet energy resolution correction strategy and apply it before any selection.
@@ -1231,7 +1245,7 @@ bool OfflineProducerHelper::select_bbbb_jets(NanoAODTree& nat, EventInfo& ei, Ou
     else if(preselectionCutStrategy=="FourBjetCut")
     {
         fourBjetCut_PreselectionCut(jets, ei);
-        ei.nJet = jets.size();
+        // ei.nJet = jets.size();
     }
     else if(preselectionCutStrategy=="None")
     {
@@ -3880,7 +3894,7 @@ bool OfflineProducerHelper::select_gen_bb_bb (NanoAODTree& nat, EventInfo& ei)
 }
 
 
-bool OfflineProducerHelper::select_gen_bb_bb_forXYH (NanoAODTree& nat, EventInfo& ei, const float maxDeltaR)
+bool OfflineProducerHelper::select_gen_bb_bb_forXYH (NanoAODTree& nat, EventInfo& ei, const float maxDeltaR, const int mY)
 {
     if (!ei.gen_H1 || !ei.gen_H2)
     {
@@ -4017,6 +4031,85 @@ bool OfflineProducerHelper::select_gen_bb_bb_forXYH (NanoAODTree& nat, EventInfo
 
     if(matchedCandidateFromH2[0] == matchedCandidateFromH2[1] && matchedCandidateFromH2[0]!=-1) std::cout<< "Something went really bad\n";
 
+    // Allow for Higgs and Y to be switched if mY is the same as mH
+    if(mY == 125 && (matchedCandidateFromH1[0] < 0 || matchedCandidateFromH1[1] < 0 || matchedCandidateFromH2[0] < 0 || matchedCandidateFromH2[1] < 0))
+    {
+        //match generated H1
+        std::vector<double> candidateFromH1Phi {ei.H2_b1->P4().Phi()    , ei.H2_b2->P4().Phi()    };
+        std::vector<double> candidateFromH1Eta {ei.H2_b1->P4().Eta()    , ei.H2_b2->P4().Eta()    };
+        std::vector<double> genBJetFromH1Phi   {ei.gen_H1_b1->P4().Phi(), ei.gen_H1_b2->P4().Phi()};
+        std::vector<double> genBJetFromH1Eta   {ei.gen_H1_b1->P4().Eta(), ei.gen_H1_b2->P4().Eta()};
+        std::vector<bool> isCandidateFromH1Matched(2,false);
+        std::vector<int>  matchedCandidateFromH1(2,-1);
+
+        ei.H1_bb_deltaPhi = candidateFromH1Phi[0] - candidateFromH1Phi[1];
+        ei.H1_bb_deltaEta = candidateFromH1Eta[0] - candidateFromH1Eta[1];
+
+        for(uint8_t itGenBJet=0; itGenBJet<2; ++itGenBJet)
+        {
+            double deltaR = 1024;
+            int    candidateMatched=-1;
+            for(uint8_t itCandidate=0; itCandidate<2; ++itCandidate)
+            {
+                if(isCandidateFromH1Matched[itCandidate]) continue;
+                double tmpDeltaR = deltaPhi(candidateFromH1Phi[itCandidate],genBJetFromH1Phi[itGenBJet])*deltaPhi(candidateFromH1Phi[itCandidate],genBJetFromH1Phi[itGenBJet]) + (candidateFromH1Eta[itCandidate]-genBJetFromH1Eta[itGenBJet])*(candidateFromH1Eta[itCandidate]-genBJetFromH1Eta[itGenBJet]);
+                if(tmpDeltaR<deltaR)
+                {
+                    deltaR = tmpDeltaR;
+                    candidateMatched = itCandidate;
+                }
+            }
+            if(deltaR< (maxDeltaR*maxDeltaR))
+            {
+                isCandidateFromH1Matched[candidateMatched] = true;
+                matchedCandidateFromH1[itGenBJet] = candidateMatched;
+            }
+
+        }
+
+        ei.gen_H1_b1_matchedflag = matchedCandidateFromH1[0];
+        ei.gen_H1_b2_matchedflag = matchedCandidateFromH1[1];
+        if(matchedCandidateFromH1[0] == matchedCandidateFromH1[1] && matchedCandidateFromH1[0]!=-1) std::cout<< "Something went really bad\n";
+        
+        
+        //match generated H2
+        std::vector<double> candidateFromH2Phi {ei.H1_b1->P4().Phi()    , ei.H1_b2->P4().Phi()    };
+        std::vector<double> candidateFromH2Eta {ei.H1_b1->P4().Eta()    , ei.H1_b2->P4().Eta()    };
+        std::vector<double> genBJetFromH2Phi   {ei.gen_H2_b1->P4().Phi(), ei.gen_H2_b2->P4().Phi()};
+        std::vector<double> genBJetFromH2Eta   {ei.gen_H2_b1->P4().Eta(), ei.gen_H2_b2->P4().Eta()};
+        std::vector<bool> isCandidateFromH2Matched(2,false);
+        std::vector<int>  matchedCandidateFromH2(2,-1);
+
+        ei.H2_bb_deltaPhi = candidateFromH2Phi[0] - candidateFromH2Phi[1];
+        ei.H2_bb_deltaEta = candidateFromH2Eta[0] - candidateFromH2Eta[1];
+
+        for(uint8_t itGenBJet=0; itGenBJet<2; ++itGenBJet)
+        {
+            double deltaR = 1024;
+            int    candidateMatched=-1;
+            for(uint8_t itCandidate=0; itCandidate<2; ++itCandidate)
+            {
+                if(isCandidateFromH2Matched[itCandidate]) continue;
+                double tmpDeltaR = deltaPhi(candidateFromH2Phi[itCandidate],genBJetFromH2Phi[itGenBJet])*deltaPhi(candidateFromH2Phi[itCandidate],genBJetFromH2Phi[itGenBJet]) + (candidateFromH2Eta[itCandidate]-genBJetFromH2Eta[itGenBJet])*(candidateFromH2Eta[itCandidate]-genBJetFromH2Eta[itGenBJet]);
+                if(tmpDeltaR<deltaR)
+                {
+                    deltaR = tmpDeltaR;
+                    candidateMatched = itCandidate;
+                }
+            }
+            if(deltaR< (maxDeltaR*maxDeltaR))
+            {
+                isCandidateFromH2Matched[candidateMatched] = true;
+                matchedCandidateFromH2[itGenBJet] = candidateMatched;
+            }
+
+        }
+
+        ei.gen_H2_b1_matchedflag = matchedCandidateFromH2[0];
+        ei.gen_H2_b2_matchedflag = matchedCandidateFromH2[1];
+
+        if(matchedCandidateFromH2[0] == matchedCandidateFromH2[1] && matchedCandidateFromH2[0]!=-1) std::cout<< "Something went really bad\n";
+    }
 
 
 

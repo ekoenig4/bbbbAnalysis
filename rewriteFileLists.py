@@ -23,6 +23,6 @@ for mX in mx:
         try: 
             f = fileinput.input(file_path, inplace=True)
             # replaceLines(f,"fravera","srosenzw")
-            replaceLines(f,"fullSim_v1","fastSim_v1")
+            replaceLines(f,"v5","v6_swapHY")
         except: continue
         
