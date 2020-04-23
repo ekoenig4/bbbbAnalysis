@@ -356,6 +356,11 @@ void OutputTree::init_branches(bool initAllBranches)
 
     tree_->Branch("gen_jet_pt", "std::vector<double_t>", &gen_jet_pt);
     tree_->Branch("jet_pt", &jet_pt);
+    tree_->Branch("jet_eta", &jet_eta);
+    tree_->Branch("jet_phi", &jet_phi);
+    tree_->Branch("jet_bTagScore", &jet_bTagScore);
+    tree_->Branch("jet_jetID", &jet_jetID);
+    tree_->Branch("jet_PUID", &jet_PUID);
     
     // BRANCH_m_pt_eta_phi_p4(gen_q1_in)
     // BRANCH_m_pt_eta_phi_p4(gen_q2_in)
@@ -717,7 +722,7 @@ void OutputTree::clear()
 
     nGenJet = 0;
     // gen_jet_pt;
-    jet_pt = 0;
+    // jet_pt = 0;
 
     CLEAR_m_pt_eta_phi_p4(gen_q1_in)
     CLEAR_m_pt_eta_phi_p4(gen_q2_in)

@@ -127,8 +127,13 @@ class OutputTree {
         std::vector<double> gen_jet_eta;
         std::vector<double> gen_jet_phi;
         std::vector<double> gen_jet_m;
-        float jet_pt;
-
+        
+        std::vector<double> jet_pt;
+        std::vector<double> jet_eta;
+        std::vector<double> jet_phi;
+        std::vector<double> jet_bTagScore;
+        std::vector<double> jet_jetID;
+        std::vector<double> jet_PUID;
 
 
 

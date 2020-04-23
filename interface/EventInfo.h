@@ -49,7 +49,32 @@ struct EventInfo{
     std::vector<std::double_t>   gen_jet_eta;
     std::vector<std::double_t>   gen_jet_phi;
     std::vector<std::double_t>   gen_jet_m;
-    boost::optional<float>   jet_pt;
+    std::vector<std::double_t>   jet_pt;
+    std::vector<std::double_t>   jet_eta;
+    std::vector<std::double_t>   jet_phi;
+    std::vector<std::double_t>   jet_bTagScore;
+    std::vector<std::double_t>   jet_jetID;
+    std::vector<std::double_t>   jet_PUID;
+
+    boost::optional<float>   gen_H1_b1_pt;
+    boost::optional<float>   gen_H1_b1_eta;
+    boost::optional<float>   gen_H1_b1_phi;
+    boost::optional<float>   gen_H1_b1_m;
+
+    boost::optional<float>   gen_H1_b2_pt;
+    boost::optional<float>   gen_H1_b2_eta;
+    boost::optional<float>   gen_H1_b2_phi;
+    boost::optional<float>   gen_H1_b2_m;
+
+    boost::optional<float>   gen_H2_b1_pt;
+    boost::optional<float>   gen_H2_b1_eta;
+    boost::optional<float>   gen_H2_b1_phi;
+    boost::optional<float>   gen_H2_b1_m;
+
+    boost::optional<float>   gen_H2_b2_pt;
+    boost::optional<float>   gen_H2_b2_eta;
+    boost::optional<float>   gen_H2_b2_phi;
+    boost::optional<float>   gen_H2_b2_m;
 
     // VBF incoming and outcoming partons
     // hard scatter gen particles
