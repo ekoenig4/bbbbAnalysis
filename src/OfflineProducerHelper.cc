@@ -1210,6 +1210,25 @@ bool OfflineProducerHelper::select_bbbb_jets(NanoAODTree& nat, EventInfo& ei, Ou
     ei.nGenJet = *(nat.nGenJet);
     ei.nJet = *(nat.nJet);
 
+    // Loop through gen jets and collect their pT to study distribution.
+    std::vector<Jet> Jets;
+    std::vector<Double_t> Jets_pt;
+    std::vector<Double_t> Jets_eta;
+    std::vector<Double_t> Jets_phi;
+    std::vector<Double_t> Jets_m;
+    std::vector<Double_t> Jets_btagscore;
+    std::vector<Double_t> Jets_jetID;
+    std::vector<Double_t> Jets_PUID;
+
+    for (uint i = 0; i < *(nat.nJet); i++){Jets.emplace_back(Jet(i, &nat)); Jets_pt.emplace_back(Jets[i].P4().Pt()); Jets_eta.emplace_back(genJets[i].P4().Eta()); Jets_phi.emplace_back(Jets[i].P4().Phi()); Jets_btagscore.emplace_back(Jets[i].bTagScore()); Jets_jetID.emplace_back(get_property( Jets[i] ,Jet_jetId)); Jets_PUID.emplace_back(get_property(Jets[i],Jet_puId));}
+
+
+    ei.jet_pt = Jets_pt;
+    ei.jet_eta = Jets_eta;
+    ei.jet_phi = Jets_phi;
+    ei.jet_bTagScore = Jets_btagscore;
+    ei.jet_jetID = Jets_jetID;
+
 
 
     //If MC sample, then obtain the jet energy resolution correction strategy and apply it before any selection.
@@ -3992,7 +4011,16 @@ bool OfflineProducerHelper::select_gen_bb_bb_forXYH (NanoAODTree& nat, EventInfo
     ei.gen_H1_b2_matchedflag = matchedCandidateFromH1[1];
     if(matchedCandidateFromH1[0] == matchedCandidateFromH1[1] && matchedCandidateFromH1[0]!=-1) std::cout<< "Something went really bad\n";
     
-    
+    ei.gen_H1_b1_m   = ei.gen_H1_b1->P4().M();
+    ei.gen_H1_b1_pt  = ei.gen_H1_b1->P4().Pt();
+    ei.gen_H1_b1_eta = ei.gen_H1_b1->P4().Eta();
+    ei.gen_H1_b1_phi = ei.gen_H1_b1->P4().Phi();
+
+    ei.gen_H1_b2_m   = ei.gen_H1_b2->P4().M();
+    ei.gen_H1_b2_pt  = ei.gen_H1_b2->P4().Pt();
+    ei.gen_H1_b2_eta = ei.gen_H1_b2->P4().Eta();
+    ei.gen_H1_b2_phi = ei.gen_H1_b2->P4().Phi();
+
     //match generated H2
     std::vector<double> candidateFromH2Phi {ei.H2_b1->P4().Phi()    , ei.H2_b2->P4().Phi()    };
     std::vector<double> candidateFromH2Eta {ei.H2_b1->P4().Eta()    , ei.H2_b2->P4().Eta()    };
@@ -4030,6 +4058,16 @@ bool OfflineProducerHelper::select_gen_bb_bb_forXYH (NanoAODTree& nat, EventInfo
     ei.gen_H2_b2_matchedflag = matchedCandidateFromH2[1];
 
     if(matchedCandidateFromH2[0] == matchedCandidateFromH2[1] && matchedCandidateFromH2[0]!=-1) std::cout<< "Something went really bad\n";
+
+    ei.gen_H2_b1_m   = ei.gen_H2_b1->P4().M();
+    ei.gen_H2_b1_pt  = ei.gen_H2_b1->P4().Pt();
+    ei.gen_H2_b1_eta = ei.gen_H2_b1->P4().Eta();
+    ei.gen_H2_b1_phi = ei.gen_H2_b1->P4().Phi();
+
+    ei.gen_H2_b2_m   = ei.gen_H2_b2->P4().M();
+    ei.gen_H2_b2_pt  = ei.gen_H2_b2->P4().Pt();
+    ei.gen_H2_b2_eta = ei.gen_H2_b2->P4().Eta();
+    ei.gen_H2_b2_phi = ei.gen_H2_b2->P4().Phi();
 
     // Allow for Higgs and Y to be switched if mY is the same as mH
     if(mY == 125 && (matchedCandidateFromH1[0] < 0 || matchedCandidateFromH1[1] < 0 || matchedCandidateFromH2[0] < 0 || matchedCandidateFromH2[1] < 0))
