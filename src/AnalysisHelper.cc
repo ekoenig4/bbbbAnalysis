@@ -79,7 +79,7 @@ bool AnalysisHelper::readMainInfo()
 
     if (is_dir(outputFolder_.data()))
     {
-        cout << "... Output folder " << outputFolder_ << " already exist, delated it or change name\n";
+        cout << "... Output folder " << outputFolder_ << " already exist, delete it or change name\n";
         return false;
     }
 
@@ -1183,12 +1183,14 @@ void AnalysisHelper::fillHistosSample(Sample& sample, std::promise<void> theProm
     if (DEBUG) cout << " ..........DEBUG: AnalysisHelper : fillHistosSample : going to loop on tree entries... " << endl;
     Sample::selColl& plots = sample.plots();
     Sample::selColl2D& plots2D = sample.plots2D();
+    int counter = 0;
     for (long long iEv = nStart; true; ++iEv)
     {
         int got = tree->GetEntry(iEv);
         if (!isLast && iEv >= nStop) break;
         if (got == 0) break; // end of the chain
-        if (iEv % 500000 == 0) cout << "   ... reading " << iEv << " / " << nEvts << endl;
+        if (iEv % 500000 == 0) cout << "   ... reading " << counter << " / " << nEvts << endl;
+        counter++;
 
         double wEvSample = 1.0;
         // get the product of all the event weights -- sample

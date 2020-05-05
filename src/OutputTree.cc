@@ -358,9 +358,13 @@ void OutputTree::init_branches(bool initAllBranches)
     tree_->Branch("jet_pt", &jet_pt);
     tree_->Branch("jet_eta", &jet_eta);
     tree_->Branch("jet_phi", &jet_phi);
+    tree_->Branch("jet_pt_smeared", &jet_pt_smeared);
+    tree_->Branch("jet_eta_smeared", &jet_eta_smeared);
+    tree_->Branch("jet_phi_smeared", &jet_phi_smeared);
     tree_->Branch("jet_bTagScore", &jet_bTagScore);
     tree_->Branch("jet_jetID", &jet_jetID);
     tree_->Branch("jet_PUID", &jet_PUID);
+    tree_->Branch("jcu", &jcu);
     
     // BRANCH_m_pt_eta_phi_p4(gen_q1_in)
     // BRANCH_m_pt_eta_phi_p4(gen_q2_in)

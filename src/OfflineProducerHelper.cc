@@ -783,8 +783,9 @@ std::vector<Jet> OfflineProducerHelper::applyJERsmearing(NanoAODTree& nat, std::
 
 void OfflineProducerHelper::initializeApplyJERAndBregSmearing(std::string syst_and_direction)
 {
-
-    string JERmethod = any_cast<string>(parameterList_->at("JetEnergyResolution"));
+    std::cout << "Checkpoint 1 " << std::endl;
+    string JERmethod = any_cast<string>(parameterList_->at("JetEnergyResolution")) ;
+    std::cout << "Checkpoint 2 " << std::endl;
 
     if (JERmethod == "None")
     {
@@ -1112,7 +1113,7 @@ void OfflineProducerHelper::initializeApplyJESshift(std::string syst_and_directi
     return;
 }
 
-std::vector<Jet> OfflineProducerHelper::applyJESshift(NanoAODTree &nat, const std::vector<Jet> &jets, bool direction_is_up)
+std::vector<Jet> OfflineProducerHelper::applyJESshift(NanoAODTree &nat, const std::vector<Jet> &jets, bool direction_is_up, EventInfo &ei)
 {
     // calculation derived from the following twikis:
     // https://twiki.cern.ch/twiki/bin/view/CMS/JECUncertaintySources#Example_implementation
@@ -1131,6 +1132,7 @@ std::vector<Jet> OfflineProducerHelper::applyJESshift(NanoAODTree &nat, const st
 
         Jet jet = jets.at(ijet);
         jet.setP4(jet.P4() * (1 + shift * corr_factor) ); // set the shifted p4 ...
+        ei.jcu.emplace_back(shift * corr_factor);
         jet.buildP4Regressed(); // ... and reset the regressed p4 to be recomputed
         result.emplace_back(jet);
 
@@ -1184,7 +1186,7 @@ bool OfflineProducerHelper::select_bbbb_jets(NanoAODTree& nat, EventInfo& ei, Ou
 
     // if a shift was asked (shift name != "nominal"), run the systematics shift
     if (jes_syst_shift_name_ != nominal_jes_syst_shift_name){
-        auto jets_tmp = applyJESshift(nat, unsmearedJets, jes_syst_shift_dir_is_up_);
+        auto jets_tmp = applyJESshift(nat, unsmearedJets, jes_syst_shift_dir_is_up_, ei);
         unsmearedJets = jets_tmp;
     }
 
@@ -1195,20 +1197,7 @@ bool OfflineProducerHelper::select_bbbb_jets(NanoAODTree& nat, EventInfo& ei, Ou
     std::vector<Double_t> genJets_eta;
     std::vector<Double_t> genJets_phi;
     std::vector<Double_t> genJets_m;
-    // genJets_pt.reserve(*(nat.nGenJet));
-
-    // std::cout << "Num jets:" << *(nat.nGenJet) << std::endl;
-    for (uint i = 0; i < *(nat.nGenJet); i++){genJets.emplace_back(GenJet(i, &nat)); genJets_pt.emplace_back(genJets[i].P4().Pt()); genJets_eta.emplace_back(genJets[i].P4().Eta()); genJets_phi.emplace_back(genJets[i].P4().Phi()); genJets_m.emplace_back(genJets[i].P4().M());}
-
-    // std::cout << "Jet vector: " << genJets_pt << std::cout;
-
-    ei.gen_jet_pt = genJets_pt;
-    ei.gen_jet_eta = genJets_eta;
-    ei.gen_jet_phi = genJets_phi;
-    ei.gen_jet_m = genJets_m;
-    // std::cout << *(nat.nGenJet) << std::endl;
-    ei.nGenJet = *(nat.nGenJet);
-    ei.nJet = *(nat.nJet);
+    
 
     // Loop through gen jets and collect their pT to study distribution.
     std::vector<Jet> Jets;
@@ -1220,7 +1209,7 @@ bool OfflineProducerHelper::select_bbbb_jets(NanoAODTree& nat, EventInfo& ei, Ou
     std::vector<Double_t> Jets_jetID;
     std::vector<Double_t> Jets_PUID;
 
-    for (uint i = 0; i < *(nat.nJet); i++){Jets.emplace_back(Jet(i, &nat)); Jets_pt.emplace_back(Jets[i].P4().Pt()); Jets_eta.emplace_back(genJets[i].P4().Eta()); Jets_phi.emplace_back(Jets[i].P4().Phi()); Jets_btagscore.emplace_back(Jets[i].bTagScore()); Jets_jetID.emplace_back(get_property( Jets[i] ,Jet_jetId)); Jets_PUID.emplace_back(get_property(Jets[i],Jet_puId));}
+    for (uint i = 0; i < *(nat.nJet); i++){Jets.emplace_back(Jet(i, &nat)); Jets_pt.emplace_back(Jets[i].P4().Pt()); Jets_eta.emplace_back(Jets[i].P4().Eta()); Jets_phi.emplace_back(Jets[i].P4().Phi()); Jets_btagscore.emplace_back(Jets[i].bTagScore()); Jets_jetID.emplace_back(get_property( Jets[i] ,Jet_jetId)); Jets_PUID.emplace_back(get_property(Jets[i],Jet_puId));}
 
 
     ei.jet_pt = Jets_pt;
@@ -1228,6 +1217,7 @@ bool OfflineProducerHelper::select_bbbb_jets(NanoAODTree& nat, EventInfo& ei, Ou
     ei.jet_phi = Jets_phi;
     ei.jet_bTagScore = Jets_btagscore;
     ei.jet_jetID = Jets_jetID;
+    ei.jet_PUID = Jets_PUID;
 
 
 
@@ -1235,11 +1225,31 @@ bool OfflineProducerHelper::select_bbbb_jets(NanoAODTree& nat, EventInfo& ei, Ou
     if(parameterList_->find("JetEnergyResolution") != parameterList_->end())
     {   //It is MC
         jets = JERsmearing(nat, unsmearedJets);
+        for (uint i = 0; i < *(nat.nGenJet); i++){genJets.emplace_back(GenJet(i, &nat)); genJets_pt.emplace_back(genJets[i].P4().Pt()); genJets_eta.emplace_back(genJets[i].P4().Eta()); genJets_phi.emplace_back(genJets[i].P4().Phi()); genJets_m.emplace_back(genJets[i].P4().M());}
+        ei.gen_jet_pt = genJets_pt;
+        ei.gen_jet_eta = genJets_eta;
+        ei.gen_jet_phi = genJets_phi;
+        ei.gen_jet_m = genJets_m;
+        // std::cout << *(nat.nGenJet) << std::endl;
+        ei.nGenJet = *(nat.nGenJet);
+        ei.nJet = *(nat.nJet);
     }
     else
     {   //It is data
         jets = unsmearedJets;
     }
+
+    std::vector<Jet> Jets_smeared;
+    std::vector<Double_t> Jets_pt_smeared;
+    std::vector<Double_t> Jets_eta_smeared;
+    std::vector<Double_t> Jets_phi_smeared;
+
+    for (uint i = 0; i < *(nat.nJet); i++){Jets_smeared.emplace_back(Jet(i, &nat)); Jets_pt_smeared.emplace_back(Jets_smeared[i].P4().Pt()); Jets_eta_smeared.emplace_back(Jets_smeared[i].P4().Eta()); Jets_phi_smeared.emplace_back(Jets_smeared[i].P4().Phi());}
+
+
+    ei.jet_pt_smeared = Jets_pt_smeared;
+    ei.jet_eta_smeared = Jets_eta_smeared;
+    ei.jet_phi_smeared = Jets_phi_smeared;
 
     // if (*(nat.nJet) < 4)
     // {
@@ -1279,7 +1289,7 @@ bool OfflineProducerHelper::select_bbbb_jets(NanoAODTree& nat, EventInfo& ei, Ou
         return false;
     }
 
-    // sort by deepCSV (highest to lowest)
+    // sort by DeepFlavB (highest to lowest)
     stable_sort(jets.begin(), jets.end(), [](const Jet & a, const Jet & b) -> bool
     {
         return ( a.bTagScore()  > b.bTagScore() );

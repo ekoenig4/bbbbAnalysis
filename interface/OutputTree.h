@@ -128,12 +128,18 @@ class OutputTree {
         std::vector<double> gen_jet_phi;
         std::vector<double> gen_jet_m;
         
+        std::vector<double> jet_pt_smeared;
+        std::vector<double> jet_eta_smeared;
+        std::vector<double> jet_phi_smeared;
+        
         std::vector<double> jet_pt;
         std::vector<double> jet_eta;
         std::vector<double> jet_phi;
         std::vector<double> jet_bTagScore;
         std::vector<double> jet_jetID;
         std::vector<double> jet_PUID;
+
+        std::vector<std::double_t>   jcu;
 
 
 

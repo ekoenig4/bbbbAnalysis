@@ -55,6 +55,10 @@ struct EventInfo{
     std::vector<std::double_t>   jet_bTagScore;
     std::vector<std::double_t>   jet_jetID;
     std::vector<std::double_t>   jet_PUID;
+    std::vector<std::double_t>   jet_pt_smeared;
+    std::vector<std::double_t>   jet_eta_smeared;
+    std::vector<std::double_t>   jet_phi_smeared;
+    std::vector<std::double_t>   jcu;
 
     boost::optional<float>   gen_H1_b1_pt;
     boost::optional<float>   gen_H1_b1_eta;

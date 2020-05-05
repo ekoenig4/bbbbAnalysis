@@ -185,6 +185,9 @@ int main(int argc, char** argv)
     // }  
     else throw std::runtime_error("cannot recognize event choice ObjectsForCut " + preselectionCutStrategy);
 
+    if (opts["jes-shift-syst"].as<string>() != OfflineProducerHelper::nominal_jes_syst_shift_name)
+            parameterList.emplace("JECFileName", config.readStringOpt("parameters::JECFileName"));
+
 
 
     const string objectsForCut = config.readStringOpt("parameters::ObjectsForCut");

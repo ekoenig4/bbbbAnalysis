@@ -405,6 +405,7 @@ void SkimUtils::fill_output_tree(OutputTree& ot, NanoAODTree& nat, EventInfo& ei
     ot.gen_jet_eta = ei.gen_jet_eta;
     ot.gen_jet_phi = ei.gen_jet_phi;
     ot.gen_jet_m = ei.gen_jet_m;
+    ot.jcu = ei.jcu;
 
     if(ei.gen_H1_b1_eta) ot.gen_H1_b1_eta = *ei.gen_H1_b1_eta;
     if(ei.gen_H1_b1_phi) ot.gen_H1_b1_phi = *ei.gen_H1_b1_phi;
@@ -429,6 +430,9 @@ void SkimUtils::fill_output_tree(OutputTree& ot, NanoAODTree& nat, EventInfo& ei
     ot.jet_pt = ei.jet_pt;
     ot.jet_eta = ei.jet_eta;
     ot.jet_phi = ei.jet_phi;
+    ot.jet_pt_smeared = ei.jet_pt_smeared;
+    ot.jet_eta_smeared = ei.jet_eta_smeared;
+    ot.jet_phi_smeared = ei.jet_phi_smeared;
     ot.jet_bTagScore = ei.jet_bTagScore;
     ot.jet_jetID = ei.jet_jetID;
     ot.jet_PUID = ei.jet_PUID;

@@ -2,21 +2,71 @@ import numpy as np
 from ROOT import TFile
 import pandas as pd
 import matplotlib.pyplot as plt
-# from matplotlib import cm
-# from matplotlib.colors import ListedColormap
 from GenHisto import Histogram
-# import matplotlib.backends.backend_pdf
-# pdf = matplotlib.backends.backend_pdf.PdfPages("eff_and_pur_v6.pdf")
+import argparse
+import os
+import sys, fileinput
 
-# # This block of code causes bins with zero value to appear as white.
-# col_map = cm.get_cmap('rainbow', 256)
-# newcolors = col_map(np.linspace(0, 1, 256))
-# white = np.array([1, 1, 1, 1])    # White background (Red, Green, Blue, Alpha).
-# newcolors[0, :] = white    # Only change bins with 0 entries.
-# newcmp = ListedColormap(newcolors)
+mx = np.load("mX_values.npz")
+my = np.load("mY_values.npz")
 
-filename = '2016DataPlots_NMSSM_XYH_bbbb_Fast_fastSim_v6_swapHY/outPlotter.root '
+mx = np.append(mx['arr_0'],2000)
+my = np.append(my['arr_0'],1600)
+my = np.append(my,1800)
 
+directory = 'plotterListFiles/2016Resonant_NMSSM_XYH_bbbb/'
+
+def replaceLines(f, arg1, arg2):
+    for line in f:
+        line = line.replace(arg1, arg2)
+        sys.stdout.write(line)
+
+def rewriteFiles(old_job, new_job):
+
+    print("[INFO] Rewriting job tag in plotterListFiles...")
+
+    for mX in mx:
+        for mY in my:
+            filename = 'FileList_NMSSM_XYH_bbbb_MX_{}_MY_{}_Fast.txt'.format(str(mX),str(mY)) 
+            file_path = directory + filename 
+            # print("[INFO] Opening file {}".format(filename))
+            try: 
+                f = fileinput.input(file_path, inplace=True)
+                replaceLines(f, old_job, new_job)
+            except: continue
+    
+    filename = 'BTagCSV_Data_FileList_NMSSM_XYH_bbbb_Suz.txt'
+    print("[INFO] Rewriting job tag in file {}".format(filename))
+    file_path = directory + filename
+    f = fileinput.input(file_path, inplace=True)
+    replaceLines(f, old_job, new_job)
+
+    filename = 'config/Resonant_NMSSM_bbbb/MXless1000_MYgreater140/plotter_2016Resonant_NMSSM_XYH_bbbb.cfg'
+    print("[INFO] Rewriting job tag in file {}".format(filename))
+    f = fileinput.input(filename, inplace=True)
+    replaceLines(f, old_job, new_job)
+
+
+
+parser = argparse.ArgumentParser(description='Command line parser of running options')
+parser.add_argument('--job_tag',          dest='job_tag',      help='tag used to ID job',         default=None)
+args = parser.parse_args()
+print(args.job_tag)
+
+# Rewrite FileLists so reflect new job tag.
+old_job_tag = 'fastSim_maxDeltaR-pt25_mH-125' # Change this to the old job tag
+job_tag     = 'fastSim_DeepFlavB_v3' # Change this to the new job tag
+rewriteFiles(old_job_tag, job_tag)
+
+if not os.path.exists('2016DataPlots_NMSSM_XYH_bbbb_Fast_{}'.format(job_tag)):
+    os.system("fill_histograms.exe config/Resonant_NMSSM_bbbb/MXless1000_MYgreater140/plotter_2016Resonant_NMSSM_XYH_bbbb.cfg")
+else:
+    inp = raw_input("Directory with job tag already exists. To proceed with plotting, press any key. To exit, type 'exit'.")
+    print('test')
+    if inp == 'exit': 
+        sys.exit("Program ended by user.")
+
+filename = '2016DataPlots_NMSSM_XYH_bbbb_Fast_{}/outPlotter.root'.format(job_tag)
 print("[INFO] Opening file {}".format(filename))
 f = TFile(filename)
 
@@ -63,27 +113,21 @@ for MX in mX:
 # print("[INFO] Saving Pandas DataFrame to {}".format("outPlotter_efficiencies.csv"))
 # df.to_csv("outPlotter_efficiencies.csv",index=False) # Save DataFrame values as csv.
 
-tag = '_fastSim_v6'
-
 df_eff_sel = df.pivot(index='mY',columns='mX',values='eff_sel')
 df_pur_sel = df.pivot(index='mY',columns='mX',values='pur_sel')
 df_alt_pur_sel = df.pivot(index='mY',columns='mX',values='alt_pur_sel')
 
-print(df_eff_sel)
-print(df_pur_sel)
-print(df_alt_pur_sel)
-
 print("[INFO] Plotting efficiencies...")
 
-hist_eff_sel = Histogram(filesave='eff_sel{}.pdf'.format(tag), xdata=df_eff_sel, isDataFrame=True, label=True, comap='rainbow', vmin=0.0, vmax=1.0, fmt='.3f', labelsize=10, title='Efficiency, mH=125 GeV')
-hist_eff_sel.saveHist('eff_HYswap.png')
+hist_eff_sel = Histogram(filesave='eff_sel_{}.pdf'.format(job_tag), xdata=df_eff_sel, isDataFrame=True, label=True, comap='rainbow', vmin=0.0, vmax=1.0, fmt='.3f', labelsize=10, title='Efficiency')
+hist_eff_sel.saveHist('eff_sel_{}.pdf'.format(job_tag))
 
 print("[INFO] Plotting purities...")
-hist_pur_sel = Histogram(filesave='pur_sel.pdf', xdata=df_pur_sel, isDataFrame=True, label=True, comap='rainbow', vmin=0.0, vmax=1.0, fmt='.3f', labelsize=10, title='Purity (gen matching per candidate)')
-hist_pur_sel.saveHist('pur_HYswap.png')
+hist_pur_sel = Histogram(filesave='pur_HY_sel_{}.pdf'.format(job_tag), xdata=df_pur_sel, isDataFrame=True, label=True, comap='rainbow', vmin=0.0, vmax=1.0, fmt='.3f', labelsize=10, title='Purity (gen matching per candidate)')
+hist_pur_sel.saveHist('pur_HY_sel_{}.pdf'.format(job_tag))
 
-hist_eff_sel_alt = Histogram(filesave='alt_pur_sel.pdf', xdata=df_alt_pur_sel, isDataFrame=True, label=True, comap='rainbow', vmin=0.0, vmax=1.0, fmt='.3f', labelsize=10, title='Purity (gen matching per jet)')
-hist_eff_sel_alt.saveHist('pur2_HYswap.png')
+hist_eff_sel_alt = Histogram(filesave='pur_jet_sel_{}.pdf'.format(job_tag), xdata=df_alt_pur_sel, isDataFrame=True, label=True, comap='rainbow', vmin=0.0, vmax=1.0, fmt='.3f', labelsize=10, title='Purity (gen matching per jet)')
+hist_eff_sel_alt.saveHist('pur_jet_sel_{}.pdf'.format(job_tag))
 
 
 

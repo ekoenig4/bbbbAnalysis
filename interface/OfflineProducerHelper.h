@@ -301,7 +301,7 @@ class OfflineProducerHelper{
 
         // function that applies whatever smearing strategy is defined in the parameters, and returns the jet
         void initializeApplyJESshift(std::string syst_and_direction);
-        std::vector<Jet> applyJESshift(NanoAODTree &nat, const std::vector<Jet> &jets, bool direction_is_up);
+        std::vector<Jet> applyJESshift(NanoAODTree &nat, const std::vector<Jet> &jets, bool direction_is_up, EventInfo &ei);
 
         // smear the jets (resolution values can be set for up/down with class member parameters for systematic studies)
         void initializeApplyJERAndBregSmearing(std::string syst_and_direction);
