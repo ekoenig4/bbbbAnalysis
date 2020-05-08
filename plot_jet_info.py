@@ -170,8 +170,8 @@ print "[INFO] Loading ordered kinematics by pT..."
 gen_ordered = np.load('gen_ordered.npz')
 
 
-gen_H_deltaPhi = np.subtract(gen_ordered['gen_H1_b1_phi'], gen_ordered['gen_H1_b2_phi'])
-gen_Y_deltaPhi = np.subtract(gen_ordered['gen_H2_b1_phi'], gen_ordered['gen_H2_b2_phi'])
+# gen_H_deltaPhi = np.subtract(gen_ordered['gen_H1_b1_phi'], gen_ordered['gen_H1_b2_phi'])
+# gen_Y_deltaPhi = np.subtract(gen_ordered['gen_H2_b1_phi'], gen_ordered['gen_H2_b2_phi'])
 
 
 ######################################              RECONSTRUCTED DATA            #####################################
@@ -189,36 +189,80 @@ PUID          = reco_data['jet_PUID']
 
 
 ## Analysis data is extracted from a ROOT Afile with all the usual cuts. pT > 30 GeV, eta < 2.4, btag > 0.3093, tight Jet ID, medium PU ID.
-analysis_btag = analysis['jet_bTagScore']
-
 # Analysis b jets are ordered by btagscore but it is interesting to see them ordered by pT instead.
 # The ordering code is stored in ordered_kinematics.py
 sel_ordered = np.load('analysis_ordered.npz')
 
-print sel_ordered['sel_H1_b1_pt'][0:20]
-
-sel_H_deltaPhi = np.subtract(sel_ordered['sel_H1_b1_phi'], sel_ordered['sel_H1_b2_phi'])
-sel_Y_deltaPhi = np.subtract(sel_ordered['sel_H2_b1_phi'], sel_ordered['sel_H2_b2_phi'])
+# sel_H_deltaPhi = np.subtract(sel_ordered['sel_H1_b1_phi'], sel_ordered['sel_H1_b2_phi'])
+# sel_Y_deltaPhi = np.subtract(sel_ordered['sel_H2_b1_phi'], sel_ordered['sel_H2_b2_phi'])
 
 ######################################             MATCHING GEN TO RECO           #####################################
 
 # # Matching gen jet to reco jet by parent particle
-# all_b_matched_mask = np.asarray([i >= 0 and j >= 0 and k >= 0 and l >= 0 for i,j,k,l in zip(sel_H1_b1_mb,sel_H1_b2_mb,sel_H2_b1_mb,sel_H2_b2_mb)])
-# H_b1_matched = [i >= 0 for i in sel_H1_b1_mb]
-# H_b2_matched = [i >= 0 for i in sel_H1_b2_mb]
-# Y_b1_matched = [i >= 0 for i in sel_H2_b1_mb]
-# Y_b2_matched = [i >= 0 for i in sel_H2_b2_mb]
+
+H1b1mf_shift = sel_ordered['gen_H1_b1_matchedflag'] + 1
+H1b1mf_bool = H1b1mf_shift.astype(bool)
+H1b2mf_shift = sel_ordered['gen_H1_b2_matchedflag'] + 1
+H1b2mf_bool = H1b2mf_shift.astype(bool)
+H2b1mf_shift = sel_ordered['gen_H2_b1_matchedflag'] + 1
+H2b1mf_bool = H2b1mf_shift.astype(bool)
+H2b2mf_shift = sel_ordered['gen_H2_b2_matchedflag'] + 1
+H2b2mf_bool = H2b2mf_shift.astype(bool)
+
+H_b_jets_matched = np.logical_and(H1b1mf_bool, H1b2mf_bool)
+Y_b_jets_matched = np.logical_and(H2b1mf_bool, H2b2mf_bool)
+parent_gen_b_jets_matched = np.logical_and(H_b_jets_matched, Y_b_jets_matched)
+
+all_matched_gen_b_pt = np.concatenate((sel_ordered['ana_gen_H1_b1_pt'][H1b1mf_bool], sel_ordered['ana_gen_H1_b2_pt'][H1b2mf_bool], sel_ordered['ana_gen_H2_b1_pt'][H2b1mf_bool], sel_ordered['ana_gen_H2_b2_pt'][H2b2mf_bool]), axis=None)
+all_matched_gen_b_eta = np.concatenate((sel_ordered['ana_gen_H1_b1_eta'][H1b1mf_bool], sel_ordered['ana_gen_H1_b2_eta'][H1b2mf_bool], sel_ordered['ana_gen_H2_b1_eta'][H2b1mf_bool], sel_ordered['ana_gen_H2_b2_eta'][H2b2mf_bool]), axis=None)
+
+count = 0
+matched_btags = []
+unmatched_btags = []
+for H1b1_mf, H1b2_mf, H2b1_mf, H2b2_mf in zip(sel_ordered['gen_H1_b1_matchedflag'], sel_ordered['gen_H1_b2_matchedflag'], sel_ordered['gen_H2_b1_matchedflag'], sel_ordered['gen_H2_b2_matchedflag']):
+    current = [H1b1_mf, H1b2_mf] 
+    for i,jet in enumerate(current):
+        if jet == 0: matched_btags.append(sel_ordered['ana_H1_b1_btag'][count])
+        elif jet == 1: matched_btags.append(sel_ordered['ana_H1_b2_btag'][count])
+        else: continue
+    current = [H2b1_mf, H2b2_mf]
+    for i,jet in enumerate(current):
+        if jet == 0: matched_btags.append(sel_ordered['ana_H2_b1_btag'][count])
+        elif jet == 1: matched_btags.append(sel_ordered['ana_H2_b2_btag'][count])
+        else: continue
+    count += 1
+
+matched_btags = np.asarray(matched_btags)
+print np.shape(matched_btags)
+
+# Matching gen jet to reco jet with no constraints on parent particle
+H1b1mj_shift = sel_ordered['gen_H1_b1_matchedjet'] + 1
+H1b1mj_bool = H1b1mf_shift.astype(bool)
+H1b2mj_shift = sel_ordered['gen_H1_b2_matchedjet'] + 1
+H1b2mj_bool = H1b2mf_shift.astype(bool)
+H2b1mj_shift = sel_ordered['gen_H2_b1_matchedjet'] + 1
+H2b1mj_bool = H2b1mf_shift.astype(bool)
+H2b2mj_shift = sel_ordered['gen_H2_b2_matchedjet'] + 1
+H2b2mj_bool = H2b2mf_shift.astype(bool)
+
+H_b_jets_matched_all = np.logical_and(H1b1mj_bool, H1b2mj_bool)
+Y_b_jets_matched_all = np.logical_and(H2b1mj_bool, H2b2mj_bool)
+all_gen_b_jets_matched = np.logical_and(H_b_jets_matched, Y_b_jets_matched)
+
+all_matched_jet_pt = np.concatenate((sel_ordered['ana_gen_H1_b1_pt'][H1b1mj_bool], sel_ordered['ana_gen_H1_b2_pt'][H1b2mj_bool], sel_ordered['ana_gen_H2_b1_pt'][H2b1mj_bool], sel_ordered['ana_gen_H2_b2_pt'][H2b2mj_bool]), axis=None)
 
 
-# # Matching gen jet to reco jet with no constraints on parent particle
-# all_jet_matched_mask = np.asarray([i >= 0 and j >= 0 and k >= 0 and l >= 0 for i,j,k,l in zip(sel_H1_b1_mj,sel_H1_b2_mj,sel_H2_b1_mj,sel_H2_b2_mj)])
-# b1_matched = [i >= 0 for i in sel_H1_b1_mj]
-# b2_matched = [i >= 0 for i in sel_H1_b2_mj]
-# b3_matched = [i >= 0 for i in sel_H2_b1_mj]
-# b4_matched = [i >= 0 for i in sel_H2_b2_mj]
-
-
-
+# count = 0
+# matched_btags = []
+# for H1b1_mf, H1b2_mf, H2b1_mf, H2b2_mf in zip(sel_ordered['gen_H1_b1_matchedflag'], sel_ordered['gen_H1_b2_matchedflag'], sel_ordered['gen_H2_b1_matchedflag'], sel_ordered['gen_H2_b2_matchedflag']):
+#     current = [H1b1_mf, H1b2_mf, H2b1_mf, H2b2_mf]
+#     for i,jet in enumerate(current):
+#         if jet == 0: matched_btags.append(sel_ordered['ana_H1_b1_btag'][count])
+#         elif jet == 1: matched_btags.append(sel_ordered['ana_H1_b2_btag'][count])
+#         elif jet == 2: matched_btags.append(sel_ordered['ana_H2_b1_btag'][count])
+#         elif jet == 3: matched_btags.append(sel_ordered['ana_H2_b2_btag'][count])
+#         else: continue
+#     count += 1
 
 ######################################              PLOTS            #####################################
 
@@ -226,7 +270,7 @@ sel_Y_deltaPhi = np.subtract(sel_ordered['sel_H2_b1_phi'], sel_ordered['sel_H2_b
 
 print "[INFO] Creating plots and saving to pdf..."
 showbs = False
-show_Hbs = True
+show_Hbs = False
 show_Ybs = False
 show_b1s = False
 show_b2s = False
@@ -290,7 +334,9 @@ with PdfPages('plot_jet_id.pdf') as pdf:
     color, label = 'green', 'reco jets'
     # color1, color2, color3, coslor4 = 'darkblue', 'orange', 'limegreen', 'indigo'
 
+    ####--------------------------------------    pT   ----------------------------------------------#####
     kin = 'pt'
+
     n, bins, patches = PlotMe(reco_pt, kin, color, label)
     bins = 100
     if cut == 'btag':
@@ -316,7 +362,7 @@ with PdfPages('plot_jet_id.pdf') as pdf:
     plt.clf()
 
 
-
+    ####--------------------------------------    eta   ----------------------------------------------#####
     kin = 'eta'
     n, bins, patches = PlotMe(reco_eta, kin, color, label)
 
@@ -343,7 +389,7 @@ with PdfPages('plot_jet_id.pdf') as pdf:
     plt.clf()
 
 
-
+    ####--------------------------------------    phi   ----------------------------------------------#####
     kin = 'phi'
     n, bins, patches = PlotMe(reco_phi, kin, color, label)
 
@@ -370,9 +416,11 @@ with PdfPages('plot_jet_id.pdf') as pdf:
     plt.clf()
 
 
-
+    ####--------------------------------------    btag  ----------------------------------------------#####
     kin = 'btag'
     n, bins, patches = PlotMe(btagscore, kin, color, label)
+    PlotMe(matched_btags, kin, 'black', 'matched jets')
+    
 
     if cut == 'btag':
         PlotMe(btagscore[generateMask(['jet_bTagScore', 0.3093, True], 'reco')], kin, 'black', 'DeepFlavB > 0.3093', bins=bins)
@@ -398,7 +446,7 @@ with PdfPages('plot_jet_id.pdf') as pdf:
 
 
 
-
+    ####---------------------------------------  jetID  ----------------------------------------------#####
     kin = 'jetID'
     n, bins, patches = PlotMe(jetID, kin, color, label)
 
@@ -426,7 +474,7 @@ with PdfPages('plot_jet_id.pdf') as pdf:
 
 
 
-
+    ####---------------------------------------  PUID  ----------------------------------------------#####
     kin = 'PUID'
     n, bins, patches = PlotMe(PUID, kin, color, label)
 
@@ -453,7 +501,7 @@ with PdfPages('plot_jet_id.pdf') as pdf:
     plt.clf()
     
 
-
+    ####--------------------------------------  jet mult  --------------------------------------------#####
     kin = 'nJet'
     PlotMe(nJet, kin, color, label)
     plt.yscale('log')
@@ -481,12 +529,12 @@ with PdfPages('plot_jet_id.pdf') as pdf:
 
 
 
-    kin = 'phi'
-    PlotMe(gen_H_deltaPhi, kin, 'magenta', r'gen $\Delta\phi_H$', bins=100)
-    PlotMe(gen_Y_deltaPhi, kin, 'mediumslateblue', r'gen $\Delta\phi_Y$', bins=100)
-    # PlotMe(sel_H_deltaPhi, kin, 'deepskyblue', r'reco $\Delta\phi_H$', bins=100)
-    # PlotMe(sel_Y_deltaPhi, kin, 'mediumseagreen', r'reco $\Delta\phi_Y$', bins=100)
-    plt.xlabel(r'$\Delta\phi$ [rad]')
-    plt.ylim(10**1, None)
-    pdf.savefig()
-    plt.clf()
+    # kin = 'phi'
+    # PlotMe(gen_H_deltaPhi, kin, 'magenta', r'gen $\Delta\phi_H$', bins=100)
+    # PlotMe(gen_Y_deltaPhi, kin, 'mediumslateblue', r'gen $\Delta\phi_Y$', bins=100)
+    # # PlotMe(sel_H_deltaPhi, kin, 'deepskyblue', r'reco $\Delta\phi_H$', bins=100)
+    # # PlotMe(sel_Y_deltaPhi, kin, 'mediumseagreen', r'reco $\Delta\phi_Y$', bins=100)
+    # plt.xlabel(r'$\Delta\phi$ [rad]')
+    # plt.ylim(10**1, None)
+    # pdf.savefig()
+    # plt.clf()
