@@ -39,10 +39,10 @@ struct EventInfo{
     boost::optional<GenPart> gen_H2_b2;
     boost::optional<int>     gen_H2_b2_matchedflag;
 
-    boost::optional<int>     recoJetMatchedToGenJet1;
-    boost::optional<int>     recoJetMatchedToGenJet2;
-    boost::optional<int>     recoJetMatchedToGenJet3;
-    boost::optional<int>     recoJetMatchedToGenJet4;
+    boost::optional<int>     gen_H1_b1_matchedjet;
+    boost::optional<int>     gen_H1_b2_matchedjet;
+    boost::optional<int>     gen_H2_b1_matchedjet;
+    boost::optional<int>     gen_H2_b2_matchedjet;
 
     boost::optional<int>     nGenJet;
     std::vector<std::double_t>   gen_jet_pt;

@@ -4206,10 +4206,15 @@ bool OfflineProducerHelper::select_gen_bb_bb_forXYH (NanoAODTree& nat, EventInfo
     if(matchedRecoToGen[1] == matchedRecoToGen[3] && matchedRecoToGen[3]!=-1) {matchedRecoToGen[1] = -1; matchedRecoToGen[3] = -1;}//std::cout<< "[ERROR] Something went very wrong\n" << matchedRecoToGen[1] << " and " << matchedRecoToGen[3] << std::endl;
     if(matchedRecoToGen[2] == matchedRecoToGen[3] && matchedRecoToGen[2]!=-1) {matchedRecoToGen[2] = -1; matchedRecoToGen[3] = -1;}//std::cout<< "[ERROR] Something went very wrong\n" << matchedRecoToGen[2] << " and " << matchedRecoToGen[3] << std::endl;
     
-    ei.recoJetMatchedToGenJet1 = matchedRecoToGen[0];
-    ei.recoJetMatchedToGenJet2 = matchedRecoToGen[1];
-    ei.recoJetMatchedToGenJet3 = matchedRecoToGen[2];
-    ei.recoJetMatchedToGenJet4 = matchedRecoToGen[3];
+    // ei.recoJetMatchedToGenJet1 = matchedRecoToGen[0];
+    // ei.recoJetMatchedToGenJet2 = matchedRecoToGen[1];
+    // ei.recoJetMatchedToGenJet3 = matchedRecoToGen[2];
+    // ei.recoJetMatchedToGenJet4 = matchedRecoToGen[3];
+
+    ei.gen_H1_b1_matchedjet = matchedRecoToGen[0];
+    ei.gen_H1_b2_matchedjet = matchedRecoToGen[1];
+    ei.gen_H2_b1_matchedjet = matchedRecoToGen[2];
+    ei.gen_H2_b2_matchedjet = matchedRecoToGen[3];
 
     return all_ok;
 }

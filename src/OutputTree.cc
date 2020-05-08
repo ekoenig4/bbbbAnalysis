@@ -349,10 +349,10 @@ void OutputTree::init_branches(bool initAllBranches)
     BRANCH_m_pt_eta_phi_p4(gen_H2_b2)
     tree_->Branch("gen_H2_b2_matchedflag", &gen_H2_b2_matchedflag);
 
-    tree_->Branch("recoJetMatchedToGenJet1", &recoJetMatchedToGenJet1);
-    tree_->Branch("recoJetMatchedToGenJet2", &recoJetMatchedToGenJet2);
-    tree_->Branch("recoJetMatchedToGenJet3", &recoJetMatchedToGenJet3);
-    tree_->Branch("recoJetMatchedToGenJet4", &recoJetMatchedToGenJet4);
+    tree_->Branch("gen_H1_b1_matchedjet", &gen_H1_b1_matchedjet);
+    tree_->Branch("gen_H1_b2_matchedjet", &gen_H1_b2_matchedjet);
+    tree_->Branch("gen_H2_b1_matchedjet", &gen_H2_b1_matchedjet);
+    tree_->Branch("gen_H2_b2_matchedjet", &gen_H2_b2_matchedjet);
 
     tree_->Branch("gen_jet_pt", "std::vector<double_t>", &gen_jet_pt);
     tree_->Branch("jet_pt", &jet_pt);
@@ -719,10 +719,10 @@ void OutputTree::clear()
     CLEAR_m_pt_eta_phi_p4(gen_H2_b2)
     gen_H2_b2_matchedflag = -1;
 
-    recoJetMatchedToGenJet1 = -1;
-    recoJetMatchedToGenJet2 = -1;
-    recoJetMatchedToGenJet3 = -1;
-    recoJetMatchedToGenJet4 = -1;
+    gen_H1_b1_matchedjet = -1;
+    gen_H1_b2_matchedjet = -1;
+    gen_H2_b1_matchedjet = -1;
+    gen_H2_b2_matchedjet = -1;
 
     nGenJet = 0;
     // gen_jet_pt;

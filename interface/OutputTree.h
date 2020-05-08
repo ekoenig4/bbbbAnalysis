@@ -117,10 +117,10 @@ class OutputTree {
 
     // Suzanne added these variables
 
-        float recoJetMatchedToGenJet1;
-        float recoJetMatchedToGenJet2;
-        float recoJetMatchedToGenJet3;
-        float recoJetMatchedToGenJet4;
+        float gen_H1_b1_matchedjet;
+        float gen_H1_b2_matchedjet;
+        float gen_H2_b1_matchedjet;
+        float gen_H2_b2_matchedjet;
 
         int nGenJet;
         std::vector<double> gen_jet_pt;
